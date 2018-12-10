@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.keybox.manage.util;
+package io.bastillion.manage.util;
 
 import java.util.Map;
 import java.util.Set;
@@ -95,7 +95,7 @@ public class AppConfig {
 
     static {
         try {
-            prop = new PropertiesConfiguration(DBUtils.DB_PATH + "KeyBoxConfig.properties");
+            prop = new PropertiesConfiguration(DBUtils.DB_PATH + "BastillionConfig.properties");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
