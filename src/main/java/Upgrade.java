@@ -36,7 +36,11 @@ public class Upgrade {
 
             try {
                 stmt = con.createStatement();
-                stmt.executeUpdate("create table if not exists license (id INTEGER PRIMARY KEY AUTO_INCREMENT, license_tx varchar not null)");
+                stmt.executeUpdate("alter table users add column last_login_tm timestamp");
+                DBUtils.closeStmt(stmt);
+
+                stmt = con.createStatement();
+                stmt.executeUpdate("alter table users add column expiration_tm timestamp");
                 DBUtils.closeStmt(stmt);
 
             } catch (Exception ex) {
