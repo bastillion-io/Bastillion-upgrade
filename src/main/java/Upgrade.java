@@ -14,46 +14,42 @@
  * limitations under the License.
  */
 
+import io.bastillion.manage.util.AppConfig;
 import io.bastillion.manage.util.DBUtils;
+import io.bastillion.manage.util.H2Upgrade;
 
-import java.sql.Connection;
-import java.sql.Statement;
+import java.util.Properties;
 
 public class Upgrade {
-    public Upgrade() {
-    }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         if (args.length != 1 || !args[0].contains("BastillionConfig.properties")) {
             System.err.println("Must run command as: java -jar bastillion-upgrade.jar <whatever path>/BastillionConfig.properties");
             System.exit(1);
         }
-
         DBUtils.DB_PATH = args[0].replaceAll("BastillionConfig.properties", "");
-        Connection con = DBUtils.getConn();
-        if (con != null) {
-            Statement stmt = null;
-
-            try {
-                stmt = con.createStatement();
-                stmt.executeUpdate("alter table users add column last_login_tm timestamp");
-                DBUtils.closeStmt(stmt);
-
-                stmt = con.createStatement();
-                stmt.executeUpdate("alter table users add column expiration_tm timestamp");
-                DBUtils.closeStmt(stmt);
-
-            } catch (Exception ex) {
-                if (stmt != null) {
-                    System.out.println(stmt.toString());
-                }
-                ex.printStackTrace();
-            } finally {
-                DBUtils.closeConn(con);
-            }
-
-            System.out.println("Upgrade successful");
+        String user = AppConfig.getProperty("dbUser");
+        String password = null;
+        if (AppConfig.isPropertyEncrypted("dbPassword")) {
+            password = AppConfig.decryptProperty("dbPassword");
+        } else {
+            password = AppConfig.getProperty("dbPassword");
         }
+        String connectionURL = AppConfig.getProperty("dbConnectionURL");
+        if (connectionURL != null && connectionURL.contains("CIPHER=")) {
+            password = "filepwd " + password;
+        }
+        assert connectionURL != null;
+        connectionURL = connectionURL.replaceAll("keydb/bastillion", DBUtils.DB_PATH +"keydb/bastillion");
+        System.out.println("connectionURL : " + connectionURL);
+
+        Properties info = new Properties();
+        info.setProperty("user", user);
+        info.setProperty("password", password);
+
+       H2Upgrade.upgrade(connectionURL, info, 200);
+
+       System.out.println("Upgrade successful");
 
     }
 }
