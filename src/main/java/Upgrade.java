@@ -18,11 +18,13 @@ import io.bastillion.manage.util.AppConfig;
 import io.bastillion.manage.util.DBUtils;
 import io.bastillion.manage.util.H2Upgrade;
 
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.Properties;
 
 public class Upgrade {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         if (args.length != 1 || !args[0].contains("BastillionConfig.properties")) {
             System.err.println("Must run command as: java -jar bastillion-upgrade.jar <whatever path>/BastillionConfig.properties");
             System.exit(1);
@@ -40,16 +42,59 @@ public class Upgrade {
             password = "filepwd " + password;
         }
         assert connectionURL != null;
-        connectionURL = connectionURL.replaceAll("keydb/bastillion", DBUtils.DB_PATH +"keydb/bastillion");
+        connectionURL = connectionURL.replaceAll("keydb/bastillion", DBUtils.DB_PATH + "keydb/bastillion");
         System.out.println("connectionURL : " + connectionURL);
 
         Properties info = new Properties();
         info.setProperty("user", user);
         info.setProperty("password", password);
 
-       H2Upgrade.upgrade(connectionURL, info, 200);
+        try {
+            H2Upgrade.upgrade(connectionURL, info, 200);
+        } catch (Exception ignore) {
+            ignore.printStackTrace();
+        }
 
-       System.out.println("Upgrade successful");
+        Connection con = DBUtils.getConn();
+        System.out.println(con);
+        if (con != null) {
 
+            Statement stmt;
+            try {
+                stmt = con.createStatement();
+                stmt.executeUpdate("ALTER TABLE system RENAME COLUMN \"USER\" to USERNAME");
+                DBUtils.closeStmt(stmt);
+            } catch (Exception ignore) {
+                ignore.printStackTrace();
+            }
+
+            try {
+                stmt = con.createStatement();
+                stmt.executeUpdate("ALTER TABLE system RENAME COLUMN \"user\" to USERNAME");
+                DBUtils.closeStmt(stmt);
+            } catch (Exception ignore) {
+                ignore.printStackTrace();
+            }
+
+            try {
+                stmt = con.createStatement();
+                stmt.executeUpdate("ALTER TABLE terminal_log RENAME COLUMN \"USER\" to USERNAME");
+                DBUtils.closeStmt(stmt);
+            } catch (Exception ignore) {
+                ignore.printStackTrace();
+            }
+
+            try {
+                stmt = con.createStatement();
+                stmt.executeUpdate("ALTER TABLE terminal_log RENAME COLUMN \"user\" to USERNAME");
+                DBUtils.closeStmt(stmt);
+            } catch (Exception ignore) {
+                ignore.printStackTrace();
+            }
+
+            DBUtils.closeConn(con);
+
+            System.out.println("Upgrade successful");
+        }
     }
 }
