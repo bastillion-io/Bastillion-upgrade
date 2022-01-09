@@ -23,10 +23,22 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 
 public class EncryptionUtil {
-    private static final byte[] key = KeyStoreUtil.getSecretBytes("KEYBOX-ENCRYPTION_KEY");
-    public static final String CRYPT_ALGORITHM = "AES";
-    public static final String HASH_ALGORITHM = "SHA-256";
+    public static final String ENCRYPTION_KEY_NM;
+    public static final String KEYBOX_ENCRYPTION_KEY = "KEYBOX-ENCRYPTION_KEY";
+    public static final String EC2BOX_ENCRYPTION_KEY = "EC2BOX-ENCRYPTION_KEY";
+    private static final byte[] keybox = KeyStoreUtil.getSecretBytes(KEYBOX_ENCRYPTION_KEY);
+    private static final byte[] ec2box = KeyStoreUtil.getSecretBytes(EC2BOX_ENCRYPTION_KEY);
+    private static final byte[] key;
 
+    static {
+       if(keybox != null && keybox.length > 0) {
+           key = keybox;
+           ENCRYPTION_KEY_NM = KEYBOX_ENCRYPTION_KEY;
+       } else {
+           key = ec2box;
+           ENCRYPTION_KEY_NM = EC2BOX_ENCRYPTION_KEY;
+       }
+    }
     private EncryptionUtil() {
     }
 

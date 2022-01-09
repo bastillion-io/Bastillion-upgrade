@@ -28,8 +28,6 @@ public class KeyStoreUtil {
     private static KeyStore keyStore = null;
     private static final String keyStoreFile;
     private static final char[] KEYSTORE_PASS;
-    private static final byte[] key;
-    public static final String ENCRYPTION_KEY_ALIAS = "KEYBOX-ENCRYPTION_KEY";
 
     public KeyStoreUtil() {
     }
@@ -41,7 +39,7 @@ public class KeyStoreUtil {
             SecretKeyEntry entry = (SecretKeyEntry) keyStore.getEntry(alias, new PasswordProtection(KEYSTORE_PASS));
             value = entry.getSecretKey().getEncoded();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
         }
 
         return value;
@@ -81,7 +79,7 @@ public class KeyStoreUtil {
         try {
             keyStore = KeyStore.getInstance("JCEKS");
             keyStore.load((InputStream) null, KEYSTORE_PASS);
-            setSecret("KEYBOX-ENCRYPTION_KEY", key);
+            setSecret(EncryptionUtil.ENCRYPTION_KEY_NM, getKey());
             FileOutputStream fos = new FileOutputStream(keyStoreFile);
             keyStore.store(fos, KEYSTORE_PASS);
             fos.close();
@@ -91,10 +89,22 @@ public class KeyStoreUtil {
 
     }
 
+    private static byte[] getKey() {
+        byte[] key;
+        if (EncryptionUtil.ENCRYPTION_KEY_NM.equals(EncryptionUtil.KEYBOX_ENCRYPTION_KEY)) {
+            key = new byte[]{100, 51, 50, 116, 112, 100, 77, 111, 73, 56, 120, 122, 97, 80, 111, 100};
+        } else {
+            key = new byte[]{'t', '3', '2', 'm', 'p', 'd', 'M', 'O', 'i', '8', 'x', 'z', 'a', 'P', 'o', 'd'};
+        }
+        return key;
+    }
+
+
     static {
         keyStoreFile = DBUtils.DB_PATH + "bastillion.jceks";
         KEYSTORE_PASS = new char[]{'G', '~', 'r', 'x', 'Z', 'E', 'w', 'f', 'a', '[', '!', 'f', 'Z', 'd', '*', 'L', '8', 'm', 'h', 'u', '#', 'j', '9', ':', '~', ';', 'U', '>', 'O', 'i', '8', 'r', 'C', '}', 'f', 't', '%', '[', 'H', 'h', 'M', '&', 'K', ':', 'l', '5', 'c', 'H', '6', 'r', 'A', 'E', '.', 'F', 'Y', 'W', '}', '{', '*', '8', 'd', 'E', 'C', 'A', '6', 'F', 'm', 'j', 'u', 'A', 'Q', '%', '{', '/', '@', 'm', '&', '5', 'S', 'q', '4', 'Q', '+', 'Y', '|', 'X', 'W', 'z', '8', '<', 'j', 'd', 'a', '}', '`', '0', 'N', 'B', '3', 'i', 'v', '5', 'U', ' ', '2', 'd', 'd', '(', '&', 'J', '_', '9', 'o', '(', '2', 'I', '`', ';', '>', '#', '$', 'X', 'j', '&', '&', '%', '>', '#', '7', 'q', '>', ')', 'L', 'A', 'v', 'h', 'j', 'i', '8', '~', ')', 'a', '~', 'W', '/', 'l', 'H', 'L', 'R', '+', '\\', 'i', 'R', '_', '+', 'y', 's', '0', 'n', '\'', '=', '{', 'B', ':', 'l', '1', '%', '^', 'd', 'n', 'H', 'X', 'B', '$', 'f', '"', '#', ')', '{', 'L', '/', 'q', '\'', 'O', '%', 's', 'M', 'Q', ']', 'D', 'v', ';', 'L', 'C', 'd', '?', 'D', 'l', 'h', 'd', 'i', 'N', '4', 'R', '>', 'O', ';', '$', '(', '4', '-', '0', '^', 'Y', ')', '5', 'V', 'M', '7', 'S', 'a', 'c', 'D', 'C', 'w', 'A', 'o', 'n', 's', 'r', '*', 'G', '[', 'l', 'h', '$', 'U', 's', '_', 'D', 'f', 'X', '~', '.', '7', 'B', 'A', 'E', '(', '#', ']', ':', '`', ',', 'k', 'y'};
-        key = new byte[]{100, 51, 50, 116, 112, 100, 77, 111, 73, 56, 120, 122, 97, 80, 111, 100};
+
+
         File f = new File(keyStoreFile);
         if (f.isFile() && f.canRead()) {
             try {

@@ -42,7 +42,7 @@ public class Upgrade {
             password = "filepwd " + password;
         }
         assert connectionURL != null;
-        connectionURL = connectionURL.replaceAll("keydb/bastillion", DBUtils.DB_PATH + "keydb/bastillion");
+        connectionURL = connectionURL.replaceAll("jdbc:h2:", "jdbc:h2:" + DBUtils.DB_PATH);
         System.out.println("connectionURL : " + connectionURL);
 
         Properties info = new Properties();
@@ -52,7 +52,6 @@ public class Upgrade {
         try {
             H2Upgrade.upgrade(connectionURL, info, 200);
         } catch (Exception ignore) {
-            ignore.printStackTrace();
         }
 
         Connection con = DBUtils.getConn();
@@ -65,7 +64,6 @@ public class Upgrade {
                 stmt.executeUpdate("ALTER TABLE system RENAME COLUMN \"USER\" to USERNAME");
                 DBUtils.closeStmt(stmt);
             } catch (Exception ignore) {
-                ignore.printStackTrace();
             }
 
             try {
@@ -73,7 +71,6 @@ public class Upgrade {
                 stmt.executeUpdate("ALTER TABLE system RENAME COLUMN \"user\" to USERNAME");
                 DBUtils.closeStmt(stmt);
             } catch (Exception ignore) {
-                ignore.printStackTrace();
             }
 
             try {
@@ -81,7 +78,6 @@ public class Upgrade {
                 stmt.executeUpdate("ALTER TABLE terminal_log RENAME COLUMN \"USER\" to USERNAME");
                 DBUtils.closeStmt(stmt);
             } catch (Exception ignore) {
-                ignore.printStackTrace();
             }
 
             try {
@@ -89,7 +85,6 @@ public class Upgrade {
                 stmt.executeUpdate("ALTER TABLE terminal_log RENAME COLUMN \"user\" to USERNAME");
                 DBUtils.closeStmt(stmt);
             } catch (Exception ignore) {
-                ignore.printStackTrace();
             }
 
             DBUtils.closeConn(con);
